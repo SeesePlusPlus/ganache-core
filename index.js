@@ -6,7 +6,7 @@ module.exports = {
   server: function(options) {
     return Server.create(options);
   },
-  provider: function(options) {
-    return new Provider(options);
+  provider: function(options, callback) {
+    return new Provider(options, callback);
   }
 };

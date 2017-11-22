@@ -25,12 +25,14 @@ describe("Debug", function() {
     async.series([
       (callback) => {
         provider = TestRPC.provider({
+          "debug": true,
           "sdb": true
         }, callback);
       },
 
       (callback) => {
         web3.setProvider(provider);
+        callback();
       }
     ], (err) => {
       if(err) throw err;
