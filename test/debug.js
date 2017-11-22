@@ -4,6 +4,7 @@ var TestRPC = require("../index.js");
 var fs = require("fs");
 var path = require("path");
 var solc = require("solc");
+const async = require("async");
 
 // Thanks solc. At least this works!
 // This removes solc's overzealous uncaughtException event handler.
@@ -19,9 +20,23 @@ describe("Debug", function() {
   var hashToTrace = null;
   var expectedValueBeforeTrace = 1234;
 
-  before("set provider", function() {
-    provider = TestRPC.provider();
-    web3.setProvider(provider);
+  before("set provider", function(done) {
+    this.timeout(60000);
+    async.series([
+      (callback) => {
+        provider = TestRPC.provider({
+          "sdb": true
+        }, callback);
+      },
+
+      (callback) => {
+        web3.setProvider(provider);
+      }
+    ], (err) => {
+      if(err) throw err;
+
+      done();
+    })
   });
 
   before("get accounts", function(done) {
