@@ -53,8 +53,10 @@ describe("Debug", function() {
     this.timeout(10000);
     var result = solc.compile({sources: {"DebugContract.sol": source}}, 1);
 
-    var code = "0x" + result.contracts["DebugContract.sol:DebugContract"].bytecode;
-    var abi = JSON.parse(result.contracts["DebugContract.sol:DebugContract"].interface);
+    var sourceName = "DebugContract.sol:DebugContract";
+    var sourceMap = result.contracts[sourceName].srcmapRuntime;
+    var code = "0x" + result.contracts[sourceName].bytecode;
+    var abi = JSON.parse(result.contracts[sourceName].interface);
 
     DebugContract = web3.eth.contract(abi);
     DebugContract._code = code;
@@ -63,6 +65,10 @@ describe("Debug", function() {
       if (!instance.address) return;
 
       debugContract = instance;
+      if (provider.manager.state.sdbHook) {
+        // We need to do this to know which addresses have which source maps
+        provider.manager.state.sdbHook.linkDebugSymbols(instance.address, sourceName, sourceMap);
+      }
 
       done();
     });
@@ -70,6 +76,7 @@ describe("Debug", function() {
 
   before("set up transaction that should be traced", function(done) {
     // This should execute immediately.
+    this.timeout(360000);
     debugContract.setValue(26, {from: accounts[0], gas: 3141592}, function(err, tx) {
       if (err) return done(err);
 
