@@ -16,7 +16,8 @@ describe("Debug", function() {
   var accounts;
   var DebugContract;
   var debugContract;
-  var source = fs.readFileSync(path.join(__dirname, "DebugContract.sol"), "utf8");
+  var sourcePath = path.join(__dirname, "DebugContract.sol");
+  var source = fs.readFileSync(sourcePath, "utf8");
   var hashToTrace = null;
   var expectedValueBeforeTrace = 1234;
 
@@ -67,7 +68,7 @@ describe("Debug", function() {
       debugContract = instance;
       if (provider.manager.state.sdbHook) {
         // We need to do this to know which addresses have which source maps
-        provider.manager.state.sdbHook.linkDebugSymbols(instance.address, sourceName, sourceMap);
+        provider.manager.state.sdbHook.linkDebugSymbols(instance.address, sourceName, sourceMap, sourcePath);
       }
 
       done();
