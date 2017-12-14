@@ -52,7 +52,7 @@ describe("Debug", function() {
 
   before("compile source", function(done) {
     this.timeout(10000);
-    var result = solc.compile({sources: {"DebugContract.sol": source}}, 1);
+    var result = solc.compile({sources: {"DebugContract.sol": source}}, 0);
 
     var sourceName = "DebugContract.sol";
     var contractName = "DebugContract";
