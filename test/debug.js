@@ -52,11 +52,13 @@ describe("Debug", function() {
 
   before("compile source", function(done) {
     this.timeout(10000);
-    var result = solc.compile({sources: {"DebugContract.sol": source}}, 0);
+    const compileInput = { sources: {} };
+    compileInput.sources[sourcePath] = source;
+    var result = solc.compile(compileInput, 0);
 
     var sourceName = "DebugContract.sol";
     var contractName = "DebugContract";
-    var contractKey = sourceName + ":" + contractName;
+    var contractKey = sourcePath + ":" + contractName;
     var sourceMap = result.contracts[contractKey].srcmapRuntime;
     var code = "0x" + result.contracts[contractKey].bytecode;
     var abi = JSON.parse(result.contracts[contractKey].interface);
@@ -71,7 +73,7 @@ describe("Debug", function() {
       debugContract = instance;
       if (provider.manager.state.sdbHook) {
         // We need to do this to know which addresses have which source maps
-        provider.manager.state.sdbHook.linkDebugSymbols(sourceName, contractName, instance.address, sourcePath, result);
+        provider.manager.state.sdbHook.linkDebugSymbols(sourcePath, contractName, instance.address, sourcePath, result);
       }
 
       done();
