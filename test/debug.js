@@ -73,7 +73,7 @@ describe("Debug", function() {
       debugContract = instance;
       if (provider.manager.state.sdbHook) {
         // We need to do this to know which addresses have which source maps
-        provider.manager.state.sdbHook.linkDebugSymbols(sourcePath, contractName, instance.address, sourcePath, result);
+        provider.manager.state.sdbHook.linkDebugSymbols(sourcePath, contractName, instance.address, result);
       }
 
       done();
