@@ -55,6 +55,7 @@ describe("Debug", function() {
     const compileInput = { sources: {} };
     compileInput.sources[sourcePath] = source;
     var result = solc.compile(compileInput, 0);
+    provider.manager.state.sdbHook.linkCompilerOutput(result);
 
     var sourceName = "DebugContract.sol";
     var contractName = "DebugContract";
@@ -73,11 +74,34 @@ describe("Debug", function() {
       debugContract = instance;
       if (provider.manager.state.sdbHook) {
         // We need to do this to know which addresses have which source maps
-        provider.manager.state.sdbHook.linkDebugSymbols(sourcePath, contractName, instance.address, result);
+        provider.manager.state.sdbHook.linkContractAddress(sourcePath, contractName, instance.address);
       }
 
       done();
     });
+
+    /*sourceName = "DebugContract.sol";
+    contractName = "DebugContract";
+    contractKey = sourcePath + ":" + contractName;
+    sourceMap = result.contracts[contractKey].srcmapRuntime;
+    code = "0x" + result.contracts[contractKey].bytecode;
+    abi = JSON.parse(result.contracts[contractKey].interface);
+    functionHashes = result.contracts[contractKey].functionHashes;
+
+    DebugContract = web3.eth.contract(abi);
+    DebugContract._code = code;
+    DebugContract.new({data: code, from: accounts[0], gas: 3141592}, function(err, instance) {
+      if (err) return done(err);
+      if (!instance.address) return;
+
+      debugContract = instance;
+      if (provider.manager.state.sdbHook) {
+        // We need to do this to know which addresses have which source maps
+        provider.manager.state.sdbHook.linkDebugSymbols(sourcePath, contractName, instance.address);
+      }
+
+      done();
+    });*/
   });
 
   before("set up transaction that should be traced", function(done) {
