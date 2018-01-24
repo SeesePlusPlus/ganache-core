@@ -13,6 +13,7 @@ contract DebugContract {
   }
 
   function calcValue(uint _val) returns (uint256) {
-    return _val * 2;
+    uint nextVal = _val * 2;
+    return nextVal;
   }
 }
