@@ -114,7 +114,7 @@ describe("Debug", function() {
       debugContract.value({from: accounts[0], gas: 3141592}, function(err, value) {
         if (err) return done(err);
 
-        assert.equal(value, 26);
+        assert.equal(value, 2808);
 
         // Set the hash to trace to the transaction we made, so we know preconditions
         // are set correctly.
