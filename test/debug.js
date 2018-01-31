@@ -1,6 +1,6 @@
 var Web3 = require('web3');
 var assert = require('assert');
-var TestRPC = require("../index.js");
+var Ganache = require("../index.js");
 var fs = require("fs");
 var path = require("path");
 var solc = require("solc");
@@ -12,7 +12,7 @@ process.removeAllListeners("uncaughtException");
 
 describe("Debug", function() {
   var provider;
-  var web3 = new Web3();
+  var web3
   var accounts;
   var DebugContract;
   var debugContract;
@@ -42,15 +42,13 @@ describe("Debug", function() {
     })
   });
 
-  before("get accounts", function(done) {
-    web3.eth.getAccounts(function(err, accs) {
-      if (err) return done(err);
+  before("get accounts", function() {
+    return web3.eth.getAccounts().then(accs => {
       accounts = accs;
-      done();
     });
   });
 
-  before("compile source", function(done) {
+  before("compile source", function() {
     this.timeout(10000);
     const compileInput = { sources: {} };
     compileInput.sources[sourcePath] = source;
@@ -65,19 +63,20 @@ describe("Debug", function() {
     var abi = JSON.parse(result.contracts[contractKey].interface);
     var functionHashes = result.contracts[contractKey].functionHashes;
 
-    DebugContract = web3.eth.contract(abi);
+    DebugContract = new web3.eth.Contract(abi);
     DebugContract._code = code;
-    DebugContract.new({data: code, from: accounts[0], gas: 3141592}, function(err, instance) {
-      if (err) return done(err);
-      if (!instance.address) return;
 
+    return DebugContract.deploy({ data: code }).send({from: accounts[0], gas: 3141592}).then(instance => {
       debugContract = instance;
       if (provider.manager.state.sdbHook) {
         // We need to do this to know which addresses have which source maps
         provider.manager.state.sdbHook.linkContractAddress(sourcePath, contractName, instance.address);
       }
 
-      done();
+      // TODO: ugly workaround - not sure why this is necessary.
+      if (!debugContract._requestManager.provider) {
+        debugContract._requestManager.setProvider(web3.eth._provider);
+      }
     });
 
     /*sourceName = "DebugContract.sol";
@@ -104,7 +103,7 @@ describe("Debug", function() {
     });*/
   });
 
-  before("set up transaction that should be traced", function(done) {
+  before("set up transaction that should be traced", function() {
     // This should execute immediately.
     this.timeout(360000);
     debugContract.setValue(26, {from: accounts[0], gas: 3141592}, function(err, tx) {
@@ -125,54 +124,48 @@ describe("Debug", function() {
     });
   });
 
-  before("change state of contract to ensure trace doesn't overwrite data", function(done) {
+  before("change state of contract to ensure trace doesn't overwrite data", function() {
     // This should execute immediately.
-    debugContract.setValue(expectedValueBeforeTrace, {from: accounts[0], gas: 3141592}, function(err, tx) {
-      if (err) return done(err);
-
+    return debugContract.methods.setValue(expectedValueBeforeTrace).send({from: accounts[0], gas: 3141592}).then(tx => {
       // Make sure we set it right.
-      debugContract.value({from: accounts[0], gas: 3141592}, function(err, value) {
-        if (err) return done(err);
-
+      return debugContract.methods.value().call({from: accounts[0], gas: 3141592})
+    }).then(value => {
         // Now that it's 85, we can trace the transaction that set it to 26.
         assert.equal(value, expectedValueBeforeTrace);
-
-        done();
-      });
     });
   });
 
-  it("should trace a successful transaction without changing state", function(done) {
+  it("should trace a successful transaction without changing state", function() {
     // We want to trace the transaction that sets the value to 26
-    provider.sendAsync({
-      jsonrpc: "2.0",
-      method: "debug_traceTransaction",
-      params: [hashToTrace, []],
-      id: new Date().getTime()
-    }, function(err, response) {
-      if (err) return done(err);
+    return new Promise((accept, reject) => {
+      provider.send({
+        jsonrpc: "2.0",
+        method: "debug_traceTransaction",
+        params: [hashToTrace, []],
+        id: new Date().getTime()
+      }, function(err, response) {
+        if (err) reject(err);
+        if (response.error) reject(response.error);
 
-      var result = response.result;
+        var result = response.result;
 
-      // To at least assert SOMETHING, let's assert the last opcode
-      assert(result.structLogs.length > 0);
+        // To at least assert SOMETHING, let's assert the last opcode
+        assert(result.structLogs.length > 0);
 
-      var lastop = result.structLogs[result.structLogs.length - 1];
+        var lastop = result.structLogs[result.structLogs.length - 1];
 
-      assert.equal(lastop.op, "STOP");
-      assert.equal(lastop.gasCost, 1);
-      assert.equal(lastop.pc, 131);
+        assert.equal(lastop.op, "STOP");
+        assert.equal(lastop.gasCost, 1);
+        assert.equal(lastop.pc, 131);
 
+        accept();
+     });
+    }).then(() => {
       // Now let's make sure rerunning this transaction trace didn't change state
-      debugContract.value({from: accounts[0], gas: 3141592}, function(err, value) {
-        if (err) return done(err);
-
+      return debugContract.methods.value().call({from: accounts[0], gas: 3141592})
+    });then(value => {
         // Did it change state?
         assert.equal(value, expectedValueBeforeTrace);
-
-        // It didn't!
-        done();
-      });
     });
   });
 })
