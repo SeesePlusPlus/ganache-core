@@ -1,5 +1,11 @@
 pragma solidity ^0.4.2;
 
+contract TestContract {
+  function calcValue(uint val) returns (uint256) {
+    return val * 2;
+  }
+}
+
 // Changes to this file will make tests fail.
 contract DebugContract {
   uint public value = 5;
@@ -8,6 +14,8 @@ contract DebugContract {
     uint256 newVal = 108;
     uint256 nextVal = newVal / 2;
     newVal += 1;
+    TestContract t = new TestContract();
+    newVal = t.calcValue(newVal);
     uint256 priorVal = nextVal * _val;
     value = calcValue(priorVal);
   }
