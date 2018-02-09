@@ -3,8 +3,8 @@ var Server = require("./lib/server");
 
 // This interface exists so as not to cause breaking changes.
 module.exports = {
-  server: function(options) {
-    return Server.create(options);
+  server: function(options, callback) {
+    return Server.create(options, callback);
   },
   provider: function(options, callback) {
     return new Provider(options, callback);
