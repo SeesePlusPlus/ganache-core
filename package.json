@@ -37,7 +37,7 @@
     "seedrandom": "~2.4.2",
     "shebang-loader": "0.0.1",
     "solc": "0.4.18",
-    "solidity-debugger": "git+ssh://git@gitlab.com:seeseplusplus/solidity-debugger#sdb-1.0.0-rc.1",
+    "solidity-debugger": "https://gitlab.com/seeseplusplus/solidity-debugger#sdb-1.0.0-rc.1",
     "temp": "^0.8.3",
     "tmp": "0.0.31",
     "uuid": "^3.1.0",
