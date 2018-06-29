@@ -1,5 +1,5 @@
 {
-  "name": "ganache-core",
+  "name": "@velma/ganache-core",
   "version": "2.1.0-beta.0",
   "main": "./index.js",
   "directories": {
@@ -21,7 +21,7 @@
     "ethereumjs-block": "~1.2.2",
     "ethereumjs-tx": "^1.3.0",
     "ethereumjs-util": "~5.1.0",
-    "ethereumjs-vm": "git+https://github.com/SeesePlusPlus/ethereumjs-vm.git#1.0.0-rc.1",
+    "@velma/ethereumjs-vm": "2.3.3-velma-1.0.0-rc.1",
     "ethereumjs-wallet": "~0.6.0",
     "fake-merkle-patricia-tree": "~1.0.1",
     "heap": "~0.2.6",
@@ -37,7 +37,7 @@
     "seedrandom": "~2.4.2",
     "shebang-loader": "0.0.1",
     "solc": "0.4.18",
-    "solidity-debugger": "https://github.com/seeseplusplus/velma#1.0.0-rc.1",
+    "velma": "1.0.0-rc.2",
     "temp": "^0.8.3",
     "tmp": "0.0.31",
     "uuid": "^3.1.0",
