@@ -14,6 +14,7 @@
   "dependencies": {
     "abstract-leveldown": "^3.0.0",
     "async": "^2.5.0",
+    "async-eventemitter": "^0.2.4",
     "bip39": "~2.4.0",
     "bn.js": "4.11.6",
     "cachedown": "^1.0.0",
